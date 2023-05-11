@@ -56,8 +56,6 @@ jobs:
       run: |
         nix build .#container
         docker load < result
-        docker tag coder-image ${{ steps.meta.outputs.tags }}
-      # docker build . --file Dockerfile --tag my-image-name:$(date +%s)
 
     # Build and push Docker image with Buildx (don't push on PR)
     # https://github.com/docker/build-push-action
