@@ -51,7 +51,7 @@ jobs:
 
     - name: Build the Docker image
       run: |
-        nix build .#contianer
+        nix build .#container
         docker load < result
         docker tag coder-image ${{ steps.meta.outputs.tags }}
       # docker build . --file Dockerfile --tag my-image-name:$(date +%s)
