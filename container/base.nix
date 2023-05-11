@@ -31,6 +31,19 @@ let
     )
 
     (
+      writeTextDir "etc/nix/nix.conf" ''
+        allowed-users = *
+        trusted-users = root coder
+        experimental-features = nix-command flakes
+        sandbox = true
+        sandbox-fallback = false
+        substituters = https://attic.indexyz.me/indexyz https://indexyz.cachix.org https://cache.nixos.org/
+        system-features = nixos-test benchmark big-parallel kvm
+        trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= indexyz:XxexOMK+bHXR2slT4A9wnJg00EZFXCUYqlUhlEEGQEc= indexyz.cachix.org-1:biBEnuZ4vTSsVMr8anZls+Lukq8w4zTHAK8/p+fdaJQ=
+      ''
+    )
+
+    (
       writeTextDir "etc/login.defs" ''
         DEFAULT_HOME yes
       ''
@@ -109,6 +122,7 @@ buildImage {
       less
       code-server
       cacert
+      nix
     ] ++ nonRootShadowSetup { uid = 1000; user = "coder"; };
   };
 
