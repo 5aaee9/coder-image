@@ -85,6 +85,7 @@ buildImage {
     mkdir -p /home/coder
     chown -R coder:coder /home/coder
     mkdir /tmp
+    chmod -R 777 /tmp
   '';
 
   copyToRoot = pkgs.buildEnv {
