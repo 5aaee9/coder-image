@@ -106,6 +106,7 @@ buildImage {
       ncurses
       less
       code-server
+      cacert
     ] ++ nonRootShadowSetup { uid = 1000; user = "coder"; };
   };
 
