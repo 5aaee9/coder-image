@@ -104,6 +104,7 @@ buildImage {
       go
       ncurses
       less
+      code-server
     ] ++ nonRootShadowSetup { uid = 1000; user = "coder"; };
   };
 
