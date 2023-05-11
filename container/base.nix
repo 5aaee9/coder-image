@@ -86,6 +86,8 @@ buildImage {
     chown -R coder:coder /home/coder
     mkdir /tmp
     chmod -R 777 /tmp
+    cp /etc/ssl/certs/ca-bundle.crt /etc/ssl/certs/ca-certificates.crt
+    chmod -R 777 /etc/ssl/certs/
   '';
 
   copyToRoot = pkgs.buildEnv {
