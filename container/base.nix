@@ -6,6 +6,7 @@ let
     parentWrapperDir = "/run/wrappers";
   };
 
+  user = "coder";
   mkSetuidProgram = { program , source , ... }:
     ''
       mkdir -p /run/wrappers/bin/
@@ -19,7 +20,13 @@ let
       chmod "u+s,g+-s,u+rx,g+x,o+x" "/run/wrappers/bin/${program}"
     '';
 
-  nonRootShadowSetup = { user, uid, gid ? uid }: with pkgs; [
+
+  groups = {
+    gid = 30000;
+
+  };
+
+  extraRootfsFiles = with pkgs; [
     # sudo pam
     (
       writeTextDir "etc/pam.d/sudo" ''
@@ -56,79 +63,73 @@ let
     )
 
     (
-      writeTextDir "etc/shadow" ''
-        root:!x:::::::
-        ${user}:!:::::::
-      ''
-    )
-    (
-      writeTextDir "etc/passwd" ''
-        root:x:0:0:System administrator:/root:/bin/fish
-        ${user}:x:${toString uid}:${toString gid}::/home/${user}:/bin/fish
-      ''
-    )
-    (
-      writeTextDir "etc/group" ''
-        root:x:0:
-        ${user}:x:${toString gid}:
-      ''
-    )
-    (
-      writeTextDir "etc/gshadow" ''
-        root:x::
-        ${user}:x::
-      ''
-    )
-    (
       writeTextDir "etc/sudoers.d/nopasswd" ''
         ${user} ALL=(ALL) NOPASSWD:ALL
       ''
     )
   ];
+  baseRaw = buildImage {
+    name = "base-raw";
+    tag = "latest";
+
+    runAsRoot = (mkSetuidProgram {
+      program = "sudo";
+      source = "/bin/sudo";
+    }) + ''
+      mkdir -p /home/coder
+      chown -R coder:coder /home/coder
+      mkdir /tmp
+      chmod -R 777 /tmp
+      cp /etc/ssl/certs/ca-bundle.crt /etc/ssl/certs/ca-certificates.crt
+      chmod -R 777 /etc/ssl/certs/
+    '';
+
+    copyToRoot = pkgs.buildEnv {
+      name = "image-root";
+      pathsToLink = [ "/bin" "/etc" "/run/wrappers" "/share/nix-direnv" ];
+      paths = with pkgs; [
+        bashInteractive
+        coreutils
+        sudo
+        linux-pam
+        curl
+        wget
+        git
+        direnv
+        nix-direnv
+        fish
+        go
+        ncurses
+        less
+        code-server
+        cacert
+        nix
+        gnutar
+        gzip
+        gnugrep
+        which
+        findutils
+        nixpkgs
+      ] ++ extraRootfsFiles ++ pkgs.callPackage ./base/user.nix {};
+      #//nonRootShadowSetup { uid = 1000; user = "coder"; };
+    };
+
+    config = {
+      Env = [
+        "PATH=/run/wrappers/bin:/bin"
+        "NIX_PATH=nixpkgs=${nixpkgs}"
+      ];
+    };
+  };
 in
+# add new layer, fix ApplyLayer duplicates of file paths not supported
 buildImage {
-  name = "base-raw";
+  name = "base";
   tag = "latest";
+  fromImage = baseRaw;
 
-
-  runAsRoot = (mkSetuidProgram {
-    program = "sudo";
-    source = "/bin/sudo";
-  }) + ''
-    mkdir -p /home/coder
-    chown -R coder:coder /home/coder
-    mkdir /tmp
-    chmod -R 777 /tmp
-    cp /etc/ssl/certs/ca-bundle.crt /etc/ssl/certs/ca-certificates.crt
-    chmod -R 777 /etc/ssl/certs/
+  extraCommands = ''
+    # Create nix chroot path
+    mkdir -p nix/var/nix
   '';
-
-  copyToRoot = pkgs.buildEnv {
-    name = "image-root";
-    pathsToLink = [ "/bin" "/etc" "/run/wrappers" "/share/nix-direnv" ];
-    paths = with pkgs; [
-      bashInteractive
-      coreutils
-      sudo
-      linux-pam
-      curl
-      wget
-      git
-      direnv
-      nix-direnv
-      fish
-      go
-      ncurses
-      less
-      code-server
-      cacert
-      nix
-    ] ++ nonRootShadowSetup { uid = 1000; user = "coder"; };
-  };
-
-  config = {
-    Env = [
-      "PATH=/run/wrappers/bin:/bin"
-    ];
-  };
 }
