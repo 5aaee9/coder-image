@@ -109,6 +109,7 @@ let
         gnugrep
         which
         findutils
+        procps
         nixpkgs
       ] ++ extraRootfsFiles ++ pkgs.callPackage ./base/user.nix {};
       #//nonRootShadowSetup { uid = 1000; user = "coder"; };
