@@ -2,6 +2,7 @@
 
 # https://github.com/NixOS/nixpkgs/issues/153335#issuecomment-1139366573
 pkgs.writeScriptBin "fix-jetbrains-server" ''
+  #!/bin/bash
   set -euo pipefail
   bin_dir=~/.cache/JetBrains/RemoteDev/dist/
 
