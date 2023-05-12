@@ -110,6 +110,7 @@ let
         findutils
         procps
         file
+        binutils
 
         glibc.out
         inotify-tools

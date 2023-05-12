@@ -20,23 +20,22 @@ pkgs.writeScriptBin "fix-jetbrains-server" ''
   }
 
   patch_fs_notifier() {
+    echo "patching fs notifier $1"
     interpreter=$(echo ${pkgs.glibc.out}/lib/ld-linux*.so.2)
     fs_notifier=$1;
-
-    if [ -z "$in" ]; then
-      read fs_notifier;
-    fi
 
     target_size=$(get_file_size $fs_notifier)
     patchelf --set-interpreter "$interpreter" $fs_notifier
     munge_size_hack $fs_notifier $target_size
   }
-  export -f get_file_size
-  export -f munge_size_hack
-  export -f patch_fs_notifier
-  find "$bin_dir" -mindepth 5 -maxdepth 5 -name launcher.sh -exec sed -i -e 's#LD_LINUX=/lib64/ld-linux-x86-64.so.2#LD_LINUX=${pkgs.glibc.out}/lib/ld-linux-x86-64.so.2#g' {} \;
-  find "$bin_dir" -mindepth 3 -maxdepth 3 -name fsnotifier -exec bash -c 'patch_fs_notifier "{}"' \;
-  find "$bin_dir" -mindepth 3 -maxdepth 3 -name fsnotifier64 -exec bash -c 'patch_fs_notifier "{}"' \;
+
+  find "$bin_dir" -mindepth 5 -maxdepth 5 -name launcher.sh -exec sed -i -e 's#LD_LINUX=/lib64/ld-linux-x86-64.so.2#LD_LINUX=/nix/store/xnk2z26fqy86xahiz3q797dzqx96sidk-glibc-2.37-8/lib/ld-linux-x86-64.so.2#g' {} \;
+  for file in $(find "$bin_dir" -mindepth 3 -maxdepth 3 -name fsnotifier); do
+    patch_fs_notifier "$file"
+  done
+  for file in $(find "$bin_dir" -mindepth 3 -maxdepth 3 -name fsnotifier64); do
+    patch_fs_notifier "$file"
+  done
 
   while IFS=: read -r out event; do
     case "$out" in
