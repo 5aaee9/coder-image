@@ -101,7 +101,6 @@ let
         go
         ncurses
         less
-        code-server
         cacert
         nix
         gnutar
@@ -110,6 +109,11 @@ let
         which
         findutils
         procps
+
+        # IDEs support
+        jetbrains.goland
+        code-server
+
         nixpkgs
       ] ++ extraRootfsFiles ++ pkgs.callPackage ./base/user.nix {};
       #//nonRootShadowSetup { uid = 1000; user = "coder"; };
