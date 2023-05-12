@@ -109,10 +109,17 @@ let
         which
         findutils
         procps
+        file
+
+        glibc.out
+        inotify-tools
+        patchelf
+        gnused
 
         # IDEs support
-        jetbrains.goland
         code-server
+        # Jetbrains fix
+        (pkgs.callPackage ./base/jetbrains.nix { })
 
         nixpkgs
       ] ++ extraRootfsFiles ++ pkgs.callPackage ./base/user.nix {};

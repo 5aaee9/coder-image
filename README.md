@@ -21,7 +21,9 @@ resource "coder_agent" "main" {
   arch                   = "amd64"
   startup_script_timeout = 180
   startup_script         = <<-EOT
+    fix-jetbrains-server &> /tmp/jetbrains_fix.log &
     sudo nix-daemon &>/tmp/nix.log &
+
     code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
   EOT
 }
