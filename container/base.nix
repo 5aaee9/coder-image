@@ -86,7 +86,19 @@ let
 
     copyToRoot = pkgs.buildEnv {
       name = "image-root";
-      pathsToLink = [ "/bin" "/etc" "/run/wrappers" "/share/nix-direnv" "/lib" ];
+      pathsToLink = [
+        # Exec binary
+        "/bin"
+        # Etc config
+        "/etc"
+        # Suid wrapper
+        "/run/wrappers"
+        # Direnv share
+        "/share/nix-direnv"
+        # Dynmaic Libary
+        "/lib"
+      ];
+
       paths = with pkgs; [
         bashInteractive
         coreutils
@@ -146,5 +158,13 @@ buildImage {
   extraCommands = ''
     # Create nix chroot path
     mkdir -p nix/var/nix
+    mkdir -p lib64
+    # Dirty work
+    # TODO: remove this
+    # remote-dev-worker host-status will create temp jbr with out patch
+    # this is temp workaround to make it work
+
+    interpreter=$(echo ${pkgs.glibc.out}/lib/ld-linux*.so.2)
+    ln -s $interpreter lib64/ld-linux-x86-64.so.2
   '';
 }
