@@ -86,7 +86,7 @@ let
 
     copyToRoot = pkgs.buildEnv {
       name = "image-root";
-      pathsToLink = [ "/bin" "/etc" "/run/wrappers" "/share/nix-direnv" ];
+      pathsToLink = [ "/bin" "/etc" "/run/wrappers" "/share/nix-direnv" "/lib" ];
       paths = with pkgs; [
         bashInteractive
         coreutils
