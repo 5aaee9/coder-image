@@ -57,12 +57,6 @@ let
     )
 
     (
-      writeTextDir "etc/ld.so.conf" ''
-        /lib
-      ''
-    )
-
-    (
       writeTextDir "etc/bash.bashrc" ''
         source /share/nix-direnv/direnvrc
       ''
@@ -138,6 +132,7 @@ let
       Env = [
         "PATH=/run/wrappers/bin:/bin"
         "NIX_PATH=nixpkgs=${nixpkgs}"
+        "LD_LIBRARY_PATH=/lib"
       ];
     };
   };
