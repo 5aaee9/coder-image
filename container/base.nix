@@ -57,6 +57,12 @@ let
     )
 
     (
+      writeTextDir "etc/ld.so.conf" ''
+        /lib
+      ''
+    )
+
+    (
       writeTextDir "etc/bash.bashrc" ''
         source /share/nix-direnv/direnvrc
       ''
