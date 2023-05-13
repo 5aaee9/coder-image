@@ -132,8 +132,6 @@ let
 
         # IDEs support
         code-server
-        # Jetbrains fix
-        (pkgs.callPackage ./base/jetbrains.nix { })
 
         nixpkgs
       ] ++ extraRootfsFiles ++ pkgs.callPackage ./base/user.nix {};
