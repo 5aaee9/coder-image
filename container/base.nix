@@ -116,6 +116,7 @@ let
         inotify-tools
         patchelf
         gnused
+        zlib
 
         # IDEs support
         code-server
