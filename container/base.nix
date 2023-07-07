@@ -129,22 +129,53 @@ let
         patchelf
         gnused
         zlib
+        nix-ld-rs
+        openssh
 
         # IDEs support
         code-server
 
         nixpkgs
-      ] ++ extraRootfsFiles ++ pkgs.callPackage ./base/user.nix {};
+      ] ++ baseLibraries ++ extraRootfsFiles ++ pkgs.callPackage ./base/user.nix {};
       #//nonRootShadowSetup { uid = 1000; user = "coder"; };
     };
-
     config = {
       Env = [
         "PATH=/run/wrappers/bin:/bin"
         "NIX_PATH=nixpkgs=${nixpkgs}"
-        "LD_LIBRARY_PATH=/lib"
+        "NIX_LD=/nixld/lib/ld.so"
+        "NIX_LD_LIBRARY_PATH=/nixld/lib"
       ];
     };
+  };
+
+  baseLibraries = with pkgs; [
+    zlib
+    zstd
+    stdenv.cc.cc
+    curl
+    openssl
+    attr
+    libssh
+    bzip2
+    libxml2
+    acl
+    libsodium
+    util-linux
+    xz
+    systemd
+  ];
+
+  nix-ld-libraries = pkgs.buildEnv {
+    name = "lb-library-path";
+    pathsToLink = [ "/lib" ];
+    paths = map pkgs.lib.getLib baseLibraries;
+    # TODO make glibc here configurable?
+    postBuild = ''
+      ln -s ${pkgs.stdenv.cc.bintools.dynamicLinker} $out/share/nix-ld/lib/ld.so
+    '';
+    extraPrefix = "/share/nix-ld";
+    ignoreCollisions = true;
   };
 in
 # add new layer, fix ApplyLayer duplicates of file paths not supported
@@ -154,15 +185,10 @@ buildImage {
   fromImage = baseRaw;
 
   extraCommands = ''
-    # Create nix chroot path
     mkdir -p nix/var/nix
     mkdir -p lib64
-    # Dirty work
-    # TODO: remove this
-    # remote-dev-worker host-status will create temp jbr with out patch
-    # this is temp workaround to make it work
 
-    interpreter=$(echo ${pkgs.glibc.out}/lib/ld-linux*.so.2)
-    ln -s $interpreter lib64/ld-linux-x86-64.so.2
+    mkdir -p nixld
+    ln -s ${nix-ld-libraries}/share/nix-ld/lib nixld/lib
   '';
 }

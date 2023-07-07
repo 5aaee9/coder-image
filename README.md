@@ -23,7 +23,7 @@ resource "coder_agent" "main" {
   startup_script         = <<-EOT
     sudo nix-daemon &>/tmp/nix.log &
 
-    code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
+    nixld code-server --auth none --port 13337 >/tmp/code-server.log 2>&1 &
   EOT
 }
 ```
